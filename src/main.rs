@@ -4,6 +4,7 @@
 extern crate test_each_file;
 
 mod day1;
+mod day2;
 // mod template;
 
 fn main() {
