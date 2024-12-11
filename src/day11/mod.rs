@@ -40,16 +40,16 @@ fn blinking(input: &str, blinks: usize) -> usize {
 }
 
 fn transform_stone(stone: &String) -> Vec<String> {
-    match (stone.as_str(), stone.len() % 2 == 0) {
-        ("0", _) => return vec!["1".to_string()],
-        (_, true) => {
+    match stone.as_str() {
+        "0" => return vec!["1".to_string()],
+        _ if stone.len() % 2 == 0 => {
             let (stone1, stone2) = stone.split_at(stone.len() / 2);
             return vec![
                 stone1.parse::<isize>().unwrap().to_string(),
                 stone2.parse::<isize>().unwrap().to_string(),
             ];
         }
-        (_, _) => return vec![(stone.parse::<isize>().unwrap() * 2024).to_string()],
+        _ => return vec![(stone.parse::<isize>().unwrap() * 2024).to_string()],
     }
 }
 
