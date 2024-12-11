@@ -1,70 +1,42 @@
 use std::collections::HashMap;
-use std::collections::VecDeque;
 
 test_each_file! { for ["in", "out"] in "./src/day11/input" as test1 => test1 }
 test_each_file! { for ["in", "out2"] in "./src/day11/input" as test2 => test2 }
 
 fn part1(input: &str) -> usize {
-    blinking_with_queue(input, 25)
+    blinking(input, 25)
 }
 
 fn part2(input: &str) -> usize {
-    blinking_with_queue(input, 75)
+    blinking(input, 75)
 }
 
 fn blinking(input: &str, blinks: usize) -> usize {
-    let mut stones = parse_input(input);
+    let mut stone_map: HashMap<String, usize> = HashMap::new();
     let mut transform_set: HashMap<String, Vec<String>> = HashMap::new();
 
-    for i in 0..blinks {
-        let mut new_stones = Vec::with_capacity(stones.len() * 2);
+    let stones = parse_input(input);
+    stones
+        .into_iter()
+        .for_each(|stone| *stone_map.entry(stone).or_insert(0) += 1);
 
-        for stone in stones {
-            match transform_set.get(&stone) {
-                Some(transformed_stone) => new_stones.extend(transformed_stone.clone()),
-                None => {
-                    let transformed_stone = transform_stone(&stone);
-                    transform_set.insert(stone, transformed_stone.clone());
+    (0..blinks).for_each(|_| {
+        let mut next_stone_map: HashMap<String, usize> = HashMap::new();
 
-                    new_stones.extend(transformed_stone);
-                }
-            }
-        }
+        stone_map.iter().for_each(|(stone, amount)| {
+            transform_set
+                .entry(stone.to_string())
+                .or_insert(transform_stone(&stone))
+                .iter()
+                .for_each(|t_stone| {
+                    *next_stone_map.entry(t_stone.to_string()).or_insert(0) += amount
+                })
+        });
 
-        stones = new_stones
-    }
+        stone_map = next_stone_map;
+    });
 
-    stones.len()
-}
-
-fn blinking_with_queue(input: &str, blinks: usize) -> usize {
-    let mut queue: VecDeque<String> = VecDeque::new();
-    queue.extend(parse_input(input));
-
-    let mut transform_set: HashMap<String, Vec<String>> = HashMap::new();
-
-    for i in 0..blinks {
-        if i % 5 == 0 {
-            println!("iter {:#} of {:#}", i, blinks);
-        }
-
-        let batch_size = queue.len();
-
-        for _ in 0..batch_size {
-            if let Some(stone) = queue.pop_front() {
-                match transform_set.get(&stone) {
-                    Some(transformed_stone) => queue.extend(transformed_stone.clone()),
-                    None => {
-                        let transformed_stone = transform_stone(&stone);
-                        transform_set.insert(stone, transformed_stone.clone());
-                        queue.extend(transformed_stone);
-                    }
-                }
-            }
-        }
-    }
-
-    queue.len()
+    stone_map.values().sum()
 }
 
 fn transform_stone(stone: &String) -> Vec<String> {
