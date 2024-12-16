@@ -60,7 +60,7 @@ fn part2(input: &str) -> usize {
     result
         .expect("shortest path found")
         .0
-        .flat_map(|node| node.iter().map(|x| x.0).collect::<Vec<_>>())
+        .flat_map(|node| node.into_iter().map(|x| x.0))
         .collect::<HashSet<IVec2>>()
         .len()
 }
